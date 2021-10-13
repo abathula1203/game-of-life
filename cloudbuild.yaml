@@ -1,0 +1,19 @@
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+    args:
+      - '-c'
+      - >
+        # echo "Setting up gcloud for impersonation" export
+
+        gsutil cp gs://devops-323815/voltage-poc/ingestion* .
+
+        gcloud dataflow flex-template build
+        gs://devops-323815/voltage-poc/ingest-poc-test.json
+        --image-gcr-path
+        gcr.io/devops-323815/tcuingest/ingest-poc-test:latest
+        --sdk-language "JAVA"   --flex-template-base-image JAVA11 
+        --metadata-file "ingestion-streaming.json"  --jar
+        "ingestion-streaming-1.0.0.jar"  --env
+        FLEX_TEMPLATE_JAVA_MAIN_CLASS="com.ford.datafactory.streaming.json.StreamingPipeline"
+    id: Setup
+    entrypoint: /bin/bash
